@@ -1,7 +1,7 @@
 server:
   port: 8081
   servlet:
-    context-path: /ALM
+    context-path: /AIM
 spring:
   banner:
     image:
@@ -44,16 +44,22 @@ spring:
 #    props:
 #      sql:
 #        show: true #开启SQL显示，默认false
-  redis:
-    host: 192.168.10.129
-    port: 6379
-    database: 0
+#  redis:
+#    host: 192.168.10.129
+#    port: 6379
+#    database: 0
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      url: jdbc:mysql://localhost:3306/aimsystem?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username: root
       password: root
+  #控制上传文件大小的
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
@@ -66,5 +72,5 @@ mybatis-plus:
 
 
 #自定义属性，为转存文件提供位置，方便后期修改
-reggie:
+keyh:
   path: H:\ALMIMG\

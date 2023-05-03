@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Slf4j
 @ServletComponentScan//启动过滤器，才会扫描WebFilter注解
 @SpringBootApplication()
-@MapperScan("com.cyh.reggie.mapper")
+@MapperScan("com.cyh.allinthememory.mapper")
 @EnableTransactionManagement//开启事务注解
 @EnableCaching//开启spring注解缓存
 public class memoryApplication {
