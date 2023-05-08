@@ -8,33 +8,21 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * @author 宇恒
- * 自己创建的记忆记录
+ * @author keyh
+ * @description 评论内容
+ * @date 2023/5/8 22:47
  */
 @Data
-public class Record implements Serializable {
+public class HelpDiscuss implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(type = IdType.ASSIGN_ID)
-    private Long recordId;
+
+    private Long helpId;
 
     private Long userId;
 
     private LocalDateTime datePublish;
 
     private String message;
-
-    private String image;
-
-    private String tag;
-
-    private Integer isPublic;
-
-    private Integer isMemory;
-
-    /**点赞该记录的用户*/
-    private String likedUserId;
-
-
 }

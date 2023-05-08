@@ -73,4 +73,4 @@ mybatis-plus:
 
 #自定义属性，为转存文件提供位置，方便后期修改
 keyh:
-  path: H:\ALMIMG\
+  path: H:\毕设\忆无涯在线回忆怀念系统\前端\allinthememory\src\assets\ALMIMG\
