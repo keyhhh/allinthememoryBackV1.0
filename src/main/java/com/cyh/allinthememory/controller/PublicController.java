@@ -33,17 +33,15 @@ public class PublicController {
     @Autowired
     private RecordService recordService;
 
+    /**
+     * @param request:
+      * @return R<List<Record>>
+     * @author 宇恒
+     * @description TODO 返回公开记录
+     * @date 2023/5/10 21:52
+     */
     @PostMapping("/getrecordpublic")
     public R<List<Record>> getRecordPublic( HttpServletRequest request){
-//        //1.创建一个列表存放公开记录的id
-//        List<Long> idList  = new ArrayList<>();
-//        LambdaQueryWrapper<RecordPublic> queryWrapper = new LambdaQueryWrapper<>();
-//        queryWrapper.select(RecordPublic::getRecordId);
-//        List<RecordPublic> list = recordPublicService.list(queryWrapper);
-//        for (int i = 0; i < list.size(); i++) {
-//            idList.add(list.get(i).getRecordId());
-//        }
-
         //查询记录表中全部公开地记录
         LambdaQueryWrapper<Record> queryWrapper1 = new LambdaQueryWrapper<>();
         queryWrapper1.eq(Record::getIsPublic, 1);
@@ -51,6 +49,14 @@ public class PublicController {
         return R.success(recordList);
     }
 
+    /**
+     * @param record:
+    	 * @param request:
+      * @return R<String>
+     * @author 宇恒
+     * @description TODO点赞公开记录信息，公开记录的
+     * @date 2023/5/10 21:52
+     */
     @PostMapping("/likerecordpublic")
     public R<String> likeRecordPublic(@RequestBody Record record, HttpServletRequest request){
 

@@ -3,9 +3,11 @@ package com.cyh.allinthememory.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -40,7 +42,7 @@ public class User implements Serializable {
     /**头像*/
     private String avatar;
 
-    /**用户状态，目前妹使用**/
+    /**1代表未超过一年未登录；0表示已经超过一年并且已经发送短信**/
     private Integer userStatus;
 
     /**紧急联系人*/
@@ -56,7 +58,8 @@ public class User implements Serializable {
 
     private String account;
 
-
-
+    /**最近一期登录的日期*/
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
+    private LocalDate lastLogin;
 
 }

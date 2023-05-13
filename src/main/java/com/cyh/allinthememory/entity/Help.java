@@ -32,6 +32,9 @@ public class Help implements Serializable {
     /**求助信息的标题*/
     private String title;
 
+    /**同求的用户*/
+    private String likedUserId;
+
 
 
 
