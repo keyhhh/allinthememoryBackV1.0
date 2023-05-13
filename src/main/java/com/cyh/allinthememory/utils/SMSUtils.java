@@ -23,8 +23,8 @@ public class SMSUtils {
      * @param phoneNumbers 手机号
      * @param param 参数
      */
-    public static final String AccessKey_ID = "LTAI5tCHb3JZzho4ouVKk93M";
-    public static final String AccessKey_Secret = "z5o34UKNC3FcWfE84MNNTzj7CvwspY";
+    public static final String AccessKey_ID = "";
+    public static final String AccessKey_Secret = "";
     public static final String SignName = "忆无涯";
     public static final String TemplateCodeCapsule = "SMS_460780141";
     public static final String TemplateCodeUrgent = "SMS_460735214";
