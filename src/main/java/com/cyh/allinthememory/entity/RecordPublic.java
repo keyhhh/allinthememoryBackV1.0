@@ -6,16 +6,14 @@ import java.io.Serializable;
 
 /**
  * @author 宇恒
+ * 未曾使用的实体类
  */
 @Data
 public class RecordPublic implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * @ TableId(type = IdType.ASSIGN_ID)
-     * 不知后续需不需要他的主键雪花算法，还是跟随record
-     */
+
     private Long recordId;
 
     private Long userId;

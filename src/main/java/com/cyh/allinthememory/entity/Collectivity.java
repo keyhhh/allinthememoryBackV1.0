@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 /**
  * @author 宇恒
+ *未曾使用的实体类
  */
 @Data
 public class Collectivity implements Serializable {

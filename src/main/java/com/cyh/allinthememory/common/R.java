@@ -28,6 +28,13 @@ public class R<T> implements Serializable {
         return r;
     }
 
+    public static <T> R<T> sensitiveWordError(T object) {
+        R<T> r = new R<T>();
+        r.data = object;
+        r.code = 0;
+        return r;
+    }
+
     public static <T> R<T> error(String msg) {
         R r = new R();
         r.msg = msg;

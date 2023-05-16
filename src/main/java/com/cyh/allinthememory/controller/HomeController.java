@@ -1,15 +1,12 @@
 package com.cyh.allinthememory.controller;
 
-import com.aliyun.dysmsapi20170525.Client;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.cyh.allinthememory.common.R;
 import com.cyh.allinthememory.entity.Record;
-import com.cyh.allinthememory.entity.RecordPublic;
 import com.cyh.allinthememory.entity.User;
-import com.cyh.allinthememory.service.RecordPublicService;
 import com.cyh.allinthememory.service.RecordService;
-import com.cyh.allinthememory.utils.SMSUtils;
+import com.github.houbb.sensitive.word.bs.SensitiveWordBs;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,13 +30,15 @@ import java.util.List;
 public class HomeController {
     @Autowired
     private RecordService recordService;
+
     @Autowired
-    private RecordPublicService recordPublicService;
+    private SensitiveWordBs sensitiveWordBs;
+
 
     /**
      * @param user:
-    	 * @param request:
-      * @return R<List<Record>>
+     * @param request:
+     * @return R<List < Record>>
      * @author 宇恒
      * @description TODO 获取全部的记录
      * @date 2023/5/12 22:59
@@ -59,8 +56,7 @@ public class HomeController {
     }
 
     @PostMapping("getrecordbydate")
-    public R<List<Record>> getRecordByDate(@RequestBody Record record, String searchDateValue, HttpServletRequest request) {
-        System.out.println(record.toString() + "searchDateValue=" + searchDateValue);
+    public R<List<Record>> getRecordByDate(@RequestBody Record record, HttpServletRequest request) {
         LambdaQueryWrapper<Record> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Record::getUserId, record.getUserId()).eq(Record::getDatePublish, record.getDatePublish());
         List<Record> recordList = recordService.list(queryWrapper);
@@ -85,27 +81,32 @@ public class HomeController {
     }
 
 
-
     /**
      * @param record:
-    	 * @param request:
-      * @return R<Record>
+     * @param request:
+     * @return R<Record>
      * @author 宇恒
      * @description TODO 上传记录
      * @date 2023/5/12 22:59
      */
     @PostMapping("uprecord")
     public R<Record> upRecord(@RequestBody Record record, HttpServletRequest request) throws Exception {
-        log.info("###########################" + record);
-        recordService.save(record);
-        if (record.getIsPublic() == 1) {
-            RecordPublic recordPublic = new RecordPublic();
-            recordPublic.setUserId(record.getUserId());
-            recordPublic.setRecordId(record.getRecordId());
-            recordPublic.setIsMemory(record.getIsMemory());
-            recordPublicService.save(recordPublic);
+        boolean contains = sensitiveWordBs.contains(record.getMessage());
+        boolean contains1 = sensitiveWordBs.contains(record.getTag());
+        if (contains || contains1) {
+            //存在敏感词
+            if (record.getIsPublic() == 1) {
+                //还公开，就不给提交
+                return R.error("提交失败，文章包括敏感词，无法设置公开！");
+            }
         }
-        return R.success(record);
+        boolean save = recordService.save(record);
+        if (save) {
+            return R.success(record);
+        } else {
+            return R.error("提交失败");
+        }
+
     }
 
 
@@ -119,21 +120,28 @@ public class HomeController {
      */
     @PostMapping("isopen")
     public R<String> isOpen(@RequestBody Record record, HttpServletRequest request) {
-        log.info("#$%^&*" + record);
-        LambdaUpdateWrapper<Record> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Record::getRecordId, record.getRecordId());
+        Record serviceById = recordService.getById(record.getRecordId());
+        //是否包含敏感词
+        boolean contains = sensitiveWordBs.contains(serviceById.getMessage());
+        if (contains) {
+            List<String> sensitiveWordAll = sensitiveWordBs.findAll(serviceById.getMessage());
+            return R.sensitiveWordError(String.join(",", sensitiveWordAll));
+        } else {
+            LambdaUpdateWrapper<Record> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Record::getRecordId, record.getRecordId());
 
-        Record record1 = new Record();
-        record1.setIsPublic(record.getIsPublic());
+            Record record1 = new Record();
+            record1.setIsPublic(record.getIsPublic());
 
-        recordService.update(record1, updateWrapper);
-        return R.success("s");
+            recordService.update(record1, updateWrapper);
+            return R.success("开启成功");
+        }
     }
 
     /**
      * @param record:
-    	 * @param request:
-      * @return R<String>
+     * @param request:
+     * @return R<String>
      * @author 宇恒
      * @description TODO 删除记录，就传过来一个记录的id
      * @date 2023/5/12 22:58

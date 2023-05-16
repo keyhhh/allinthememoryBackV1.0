@@ -88,4 +88,24 @@ public class CapsuleController {
 
 
     }
+
+    /**
+     * @param capsule:
+    	 * @param request:
+      * @return R<String>
+     * @author 宇恒
+     * @description TODO 删除胶囊的方法
+     * @date 2023/5/17 0:10
+     */
+    @PostMapping("/decapsule")
+    public R<String> deCapsule(@RequestBody Capsule capsule, HttpServletRequest request) {
+        LambdaQueryWrapper<Capsule> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Capsule::getCapsuleId, capsule.getCapsuleId());
+        boolean remove = capsuleService.remove(queryWrapper);
+        if (remove){
+            return R.success("删除成功");
+        } else {
+            return R.error("删除失败");
+        }
+    }
 }

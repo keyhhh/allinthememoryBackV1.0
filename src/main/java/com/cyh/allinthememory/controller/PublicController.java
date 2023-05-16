@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.cyh.allinthememory.common.R;
 import com.cyh.allinthememory.entity.Record;
-import com.cyh.allinthememory.entity.RecordPublic;
 import com.cyh.allinthememory.entity.User;
-import com.cyh.allinthememory.service.RecordPublicService;
 import com.cyh.allinthememory.service.RecordService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -28,8 +27,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/public")
 public class PublicController {
-    @Autowired
-    private RecordPublicService recordPublicService;
     @Autowired
     private RecordService recordService;
 
@@ -52,7 +49,52 @@ public class PublicController {
     /**
      * @param record:
     	 * @param request:
-      * @return R<String>
+      * @return R<List<Record>>
+     * @author 宇恒
+     * @description TODO 根据日期查询公开记录
+     * @date 2023/5/16 17:45
+     */
+    @PostMapping("/getrecordpublicbydate")
+    public R<List<Record>> getRecordPublicByDate(@RequestBody Record record,  HttpServletRequest request){
+        //查询记录表中全部公开地记录
+        LambdaQueryWrapper<Record> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(Record::getIsPublic, 1).eq(Record::getDatePublish, record.getDatePublish());
+        List<Record> recordList = recordService.list(queryWrapper1);
+        return R.success(recordList);
+    }
+
+
+    /**
+     * @param user:
+     * @param request:
+     * @return R<List<Record>>
+     * @author 宇恒
+     * @description TODO 根据我的点赞查询公开记录
+     * @date 2023/5/16 17:45
+     */
+    @PostMapping("/getrecordpublicbyliked")
+    public R<List<Record>> getRecordPublicByLiked(@RequestBody User user,  HttpServletRequest request){
+        List<Record> recordList = new ArrayList<>();
+
+        LambdaQueryWrapper<Record> queryWrapper1 = new LambdaQueryWrapper<>();
+        queryWrapper1.eq(Record::getIsPublic, 1);
+        List<Record> list = recordService.list(queryWrapper1);
+        for (Record record:list){
+            if (record.getLikedUserId() != null){
+                String[] likedUserId = record.getLikedUserId().split(",");
+                List<String> likedUserIdList = new ArrayList<>(Arrays.asList(likedUserId));
+                if (likedUserIdList.contains(Long.toString(user.getUserId()))){
+                    recordList.add(record);
+                }
+            }
+        }
+        return R.success(recordList);
+    }
+
+    /**
+     * @param record:
+     * @param request:
+     * @return R<String>
      * @author 宇恒
      * @description TODO点赞公开记录信息，公开记录的
      * @date 2023/5/10 21:52
@@ -70,4 +112,5 @@ public class PublicController {
 
         return R.success("s");
     }
+
 }
