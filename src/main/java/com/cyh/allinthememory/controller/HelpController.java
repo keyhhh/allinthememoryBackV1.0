@@ -46,7 +46,7 @@ public class HelpController {
      * @date 2023/5/9 11:18
      */
     @PostMapping("/gethelp")
-    public R<List<Help>> likeRecordPublic(@RequestBody Help help, HttpServletRequest request) {
+    public R<List<Help>> getHelp(@RequestBody Help help, HttpServletRequest request) {
         List<Help> helpList = helpService.list();
         return R.success(helpList);
     }
@@ -131,33 +131,6 @@ public class HelpController {
     }
 
 
-    /**
-     * @param helpDiscuss:
-     * @param request:
-     * @return R<List < HelpDiscuss>>
-     * @author 宇恒
-     * @description TODO 上传评论信息
-     * @date 2023/5/9 11:17
-     */
-    @PostMapping("/updiscuss")
-    public R<List<HelpDiscuss>> upDiscuss(@RequestBody HelpDiscuss helpDiscuss, HttpServletRequest request) {
-        //是否包含敏感词
-        boolean contains = sensitiveWordBs.contains(helpDiscuss.getMessage());
-        if (contains) {
-            return R.error("请注意您的言语！");
-        } else {
-            boolean save = helpDiscussService.save(helpDiscuss);
-            if (save) {
-                LambdaQueryWrapper<HelpDiscuss> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(HelpDiscuss::getHelpId, helpDiscuss.getHelpId());
-                List<HelpDiscuss> list = helpDiscussService.list(queryWrapper);
-                return R.success(list);
-            } else {
-                return R.error("请稍后再试");
-            }
-        }
-    }
-
     @PostMapping("/dehelp")
     public R<List<Help>> deHelp(@RequestBody Help help, HttpServletRequest request) {
         LambdaQueryWrapper<Help> queryWrapper = new LambdaQueryWrapper<>();
@@ -192,6 +165,9 @@ public class HelpController {
         boolean messageCon = sensitiveWordBs.contains(help.getMessage());
         boolean tittleCon = sensitiveWordBs.contains(help.getTitle());
         boolean tagCon = sensitiveWordBs.contains(help.getTag());
+        System.out.println("Mesageeeeeee" +sensitiveWordBs.findAll( help.getMessage() + "@@@@@@@@" ));
+        System.out.println("Titleeeee" + sensitiveWordBs.findAll(help.getTitle() + "@@@@@@@@" ));
+        System.out.println("Taggggg" + sensitiveWordBs.findAll("Taggggg" + help.getTag() + "@@@@@@@@" ));
         if (messageCon || tittleCon || tagCon){
             return R.error("您的标题、标签或者内容存在敏感词");
         } else{
@@ -256,4 +232,34 @@ public class HelpController {
             }
         }
     }
+
+
+
+    /**
+     * @param helpDiscuss:
+     * @param request:
+     * @return R<List < HelpDiscuss>>
+     * @author 宇恒
+     * @description TODO 上传评论信息
+     * @date 2023/5/9 11:17
+     */
+    @PostMapping("/updiscuss")
+    public R<List<HelpDiscuss>> upDiscuss(@RequestBody HelpDiscuss helpDiscuss, HttpServletRequest request) {
+        //是否包含敏感词
+        boolean contains = sensitiveWordBs.contains(helpDiscuss.getMessage());
+        if (contains) {
+            return R.error("请注意您的言语！");
+        } else {
+            boolean save = helpDiscussService.save(helpDiscuss);
+            if (save) {
+                LambdaQueryWrapper<HelpDiscuss> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(HelpDiscuss::getHelpId, helpDiscuss.getHelpId());
+                List<HelpDiscuss> list = helpDiscussService.list(queryWrapper);
+                return R.success(list);
+            } else {
+                return R.error("请稍后再试");
+            }
+        }
+    }
+
 }

@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author keyh
  * @description 定时器任务 实现定时器方法，
+ * 在项目启动时，我们需要加载或者预先完成某些动
  * @date 2023/5/10 19:13
  */
 @Slf4j
@@ -31,10 +32,10 @@ import java.util.concurrent.TimeUnit;
 public class TimerUtils implements CommandLineRunner {
 
     @Autowired
-    private CapsuleService capsuleService;
+    private  CapsuleService capsuleService;
 
     @Autowired
-    private UserService userService;
+    private  UserService userService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -51,9 +52,7 @@ public class TimerUtils implements CommandLineRunner {
             @SneakyThrows
             @Override
             public void run() {
-                //定时器每天执行一次胶囊验证
                 capsuleVerify();
-                System.out.println("我是定时器任务胶囊");
             }
         };
 
@@ -69,6 +68,7 @@ public class TimerUtils implements CommandLineRunner {
             }
         };
         scheduledExecutorService.scheduleAtFixedRate(timerTaskCapsule, 1, 1, TimeUnit.DAYS);
+        scheduledExecutorService.scheduleAtFixedRate(timerTaskNotLogin, 1, 3, TimeUnit.DAYS);
     }
 
     /**
@@ -81,7 +81,7 @@ public class TimerUtils implements CommandLineRunner {
      * 2.没有到时间，不修改数据库
      * @date 2023/5/13 14:20
      */
-    public void capsuleVerify() throws Exception {
+    public  void capsuleVerify() throws Exception {
         //遍历isLocked为1的全部胶囊数据
         LambdaQueryWrapper<Capsule> queryWrapper = new LambdaQueryWrapper<>();
         List<Capsule> listIsLocked = capsuleService.list(queryWrapper.eq(Capsule::getIsLocked, 1));
@@ -91,12 +91,11 @@ public class TimerUtils implements CommandLineRunner {
         String nowDate = date.format(formatter);
         //遍历全部的  当前的日期和dateSend.toString()是否相同
         for (Capsule capsule : listIsLocked) {
+            //这个用来判断是否有过了时间但是没解锁
+            LocalDate dateSend = capsule.getDateSend();
             //胶囊的发送时间
             String sendTime = capsule.getDateSend().toString();
-            System.out.println("胶囊的发送时间：" + sendTime + "和当前时间" + nowDate);
-            System.out.println("一不一样呢" + sendTime.equals(nowDate));
-
-            if (sendTime.equals(nowDate)) {
+            if (sendTime.equals(nowDate) || date.isAfter(dateSend)) {
                 //1：相同即到达发送时间;
                 LambdaUpdateWrapper<Capsule> updateWrapper = new LambdaUpdateWrapper<>();
                 //1.1：修改isLocked为0；
@@ -120,24 +119,38 @@ public class TimerUtils implements CommandLineRunner {
      * @author 宇恒
      * @description TODO 判断是否超过一年未登录，
      * 1.每次登陆、注册、验证，刷新最后一次登录信息
-     * 2.服务器启动时检测一次，之后每天检测一次(暂时)
+     * 2.服务器启动时检测一次，之后每3天检测一次(暂时)
      * 3.首先遍历status状态未1的用户信息，在判断，
      * @date 2023/5/13 15:33
      */
-    public void notLoginVerify() throws Exception {
+    public  void notLoginVerify() throws Exception {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        List<User> userList = userService.list(queryWrapper.eq(User::getUserStatus, 1));
+        List<User> userList = userService.list(queryWrapper.eq(User::getUserStatus, 1).or().eq(User::getUserStatus, 2));
+        log.info(userList+"!!@!!!@@@#$%^&");
         LocalDate yearAgo = getYearAgo();
         for (User user : userList) {
-            System.out.println("yearAgo" + yearAgo + "user" + user.getLastLogin() + "一样吗" + user.getLastLogin().equals(yearAgo));
-            System.out.println(yearAgo.isAfter(user.getLastLogin()));
-            if (yearAgo.isAfter(user.getLastLogin())) {
-                //最近一次登录的日期在一年之前，发送短信、更改用户状态0
-                LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
-                boolean update = userService.update(updateWrapper.eq(User::getUserId, user.getUserId()).set(User::getUserStatus, 0));
-                if (update) {
-                    System.out.println("我要发送短信了");
-                    SMSUtils.sendMsg("16634866321", SMSUtils.TemplateCodeUrgent);
+            //1.排除没有设置紧急联系人的用户
+            if (user.getUrgentContact() != null ){
+                if (yearAgo.isAfter(user.getLastLogin())) {
+                    //2.用户状态为1，发送提醒短息，更改用户状态为2
+                    if (user.getUserStatus() == 1){
+                        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+                        boolean update = userService.update(updateWrapper.eq(User::getUserId, user.getUserId()).set(User::getUserStatus, 2));
+                        if (update) {
+                            //提醒短息
+                            SMSUtils.sendMsg("16634866321", SMSUtils.TemplateCodeRemind);
+                        }
+                    }
+                    //3.用户状态为2，发送紧急短信，更改用户状态为0
+                    if (user.getUserStatus() == 2){
+                        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+                        boolean update = userService.update(updateWrapper.eq(User::getUserId, user.getUserId()).set(User::getUserStatus, 0));
+                        if (update) {
+                            //紧急短信
+                            SMSUtils.sendMsg("16634866321", SMSUtils.TemplateCodeUrgent);
+                        }
+                    }
+
                 }
             }
         }
@@ -151,7 +164,7 @@ public class TimerUtils implements CommandLineRunner {
      * @description TODO 获取一年以前的日期
      * @date 2023/5/13 15:14
      */
-    public LocalDate getYearAgo() {
+    public  LocalDate getYearAgo() {
         LocalDate date = LocalDate.now();
         int year = date.getYear() - 1;
         Month month = date.getMonth();

@@ -6,6 +6,7 @@ import com.cyh.allinthememory.entity.Capsule;
 import com.cyh.allinthememory.entity.Help;
 import com.cyh.allinthememory.entity.User;
 import com.cyh.allinthememory.service.CapsuleService;
+import com.cyh.allinthememory.utils.TimerUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Time;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -28,6 +31,9 @@ public class CapsuleController {
     @Autowired
     private CapsuleService capsuleService;
 
+    @Autowired
+    private TimerUtils timerUtils;
+
     /**
      * @param user:
      * @param request:
@@ -39,7 +45,7 @@ public class CapsuleController {
     @PostMapping("/getcapsule")
     public R<List<Capsule>> getCapsule(@RequestBody User user, HttpServletRequest request) {
         LambdaQueryWrapper<Capsule> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Capsule::getUserId, user.getUserId());
+        queryWrapper.eq(Capsule::getUserId, user.getUserId()).orderByAsc(Capsule::getDateSend);
         List<Capsule> capsuleList = capsuleService.list(queryWrapper);
 
         return R.success(capsuleList);
@@ -75,12 +81,21 @@ public class CapsuleController {
      * @date 2023/5/10 22:02
      */
     @PostMapping("/upcapsule")
-    public R<List<Capsule>> upCapsule(@RequestBody Capsule capsule, HttpServletRequest request) {
+    public R<List<Capsule>> upCapsule(@RequestBody Capsule capsule, HttpServletRequest request) throws Exception {
+        log.info("@@@@@@@@@@@.+"+capsule);
+        capsule.setDateSend(capsule.getDateSend().plusDays(1));
         boolean save = capsuleService.save(capsule);
         if (save) {
             LambdaQueryWrapper<Capsule> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Capsule::getUserId, capsule.getUserId());
             List<Capsule> capsuleList = capsuleService.list(queryWrapper);
+            //给测试的数据一次单独的发送短信
+            if (capsule.getDateSend().equals(capsule.getDateCreate())){
+                log.info("这是测试的数据把，发送和创建日期是同一天");
+                Thread.sleep(5000);
+                log.info("这是shemmeyisi");
+                timerUtils.capsuleVerify();
+            }
             return R.success(capsuleList);
         } else {
             return R.error("提交失败");

@@ -2,6 +2,7 @@ package com.cyh.allinthememory.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Data;
 

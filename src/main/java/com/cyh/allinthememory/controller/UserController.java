@@ -135,19 +135,17 @@ public class UserController {
 
     /**
      * @param user:
-     * @param request:
      * @return R<User>
      * @author 宇恒
      * @description TODO 传递过来部分可以修改的信息，进行用户信息修改
      * @date 2023/5/10 21:50
      */
     @PostMapping("updateuser")
-    public R<User> updateUser(@RequestBody User user, HttpServletRequest request) {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + user);
+    public R<User> updateUser(@RequestBody User user) {
         LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(User::getUserId, user.getUserId());
 
-        if (!user.getPassword().equals("")){
+        if ( user.getPassword() != null){
             String password = user.getPassword();
             password = DigestUtils.md5DigestAsHex(password.getBytes());
             user.setPassword(password);

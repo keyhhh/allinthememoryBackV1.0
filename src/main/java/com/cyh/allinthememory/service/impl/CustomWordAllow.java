@@ -21,7 +21,7 @@ public class CustomWordAllow implements IWordAllow {
     @Override
     public List<String> allow() {
         // 从数据库中查询白名单敏感词
-        return Arrays.asList("五星红旗");
+        return Arrays.asList("五星红旗","麻将","法","然后");
     }
 
 }

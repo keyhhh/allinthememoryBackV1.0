@@ -46,7 +46,7 @@ public class HomeController {
     @PostMapping("getrecord")
     public R<List<Record>> getRecord(@RequestBody User user, HttpServletRequest request) {
         LambdaQueryWrapper<Record> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Record::getUserId, user.getUserId());
+        queryWrapper.eq(Record::getUserId, user.getUserId()).orderByAsc(Record::getDatePublish);
         List<Record> recordList = recordService.list(queryWrapper);
 
         if (recordList == null) {

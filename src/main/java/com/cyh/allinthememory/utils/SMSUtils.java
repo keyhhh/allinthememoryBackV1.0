@@ -23,10 +23,12 @@ public class SMSUtils {
      * @param phoneNumbers 手机号
      * @param param 参数
      */
-
+    public static final String AccessKey_ID = "LTAI5t72WPFxoNYzEXzPYToM";
+    public static final String AccessKey_Secret = "9Z0AVKoyoyAAs0dYVXnMAiFIRCXaSo";
     public static final String SignName = "忆无涯";
     public static final String TemplateCodeCapsule = "SMS_460780141";
     public static final String TemplateCodeUrgent = "SMS_460735214";
+    public static final String TemplateCodeRemind = "SMS_460935227";
     /**
      * 使用AK&SK初始化账号Client
      *
